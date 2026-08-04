@@ -1,4 +1,4 @@
-# Experience Card: Early Renewal (Customer Details — Early Renew)
+# Experience Card: Early Renewal
 
 - Early Renew Entry Point (Customer Details Page)
 - Early Renewal Order Dialog

@@ -1,200 +1,149 @@
-# Reference Workflow: Anytime Upgrade
-last-updated: 2026-04-21
+# Experience Card: Anytime Upgrade
 
-figma-url: https://www.figma.com/design/c3rdN5VOmVVkwTMkb6pMYj/midterm?node-id=0-1&p=f&t=LjNBinF9wa5P7Itx-0
+- Upgrade Entry Point (Active Products, Customer Details Page)
+- Upgrade Paths Dialog
+- Upgrade Order Summary (Checkout Page)
+
+figma-url:
 
 ---
 
 ## Overview
 
-The Anytime Upgrade feature allows a partner to upgrade a customer's active subscription
-to a higher-tier product before the subscription's anniversary date. The upgrade is
-executed as a switch order — the existing subscription is cancelled and replaced with
-the new one, with prorated pricing applied for the remaining term.
+Anytime Upgrade lets a partner move a customer's active subscription to a higher-tier product before the subscription's anniversary date, instead of waiting for renewal. The upgrade is executed as a **switch order** — the existing subscription is cancelled and replaced with the new one, with prorated pricing applied for the remaining term.
+
+A partner starts an upgrade from the **Active Products entry point** — an **Upgrade** action on a subscription's product card on the Customer Details page, driven by that subscription's available upgrade paths. From there, the flow continues to the **Upgrade Paths Dialog** (target selection) and then the **Upgrade Order Summary** checkout page (preview + place order), placing a `SWITCH` order.
+
+The API layer also supports reverting a switch order (`PREVIEW_REVERT_SWITCH` / `REVERT_SWITCH`, within a 14-day window) - **this is not implemented in this app's UI today.
 
 ---
 
-## Preconditions
+## Goals
 
-- The customer has at least one active subscription.
-- The partner has a valid session with an active org context.
-- Upgrade eligibility is determined per subscription, not per customer.
-
----
-
-## Step 1 — Determine upgrade eligibility per subscription
-
-**Trigger:** The product listing screen renders.
-
-**Action:** For each active subscription displayed, check whether upgrade paths exist.
-
-**API call:**
-```
-GET /v3/offer-switch-paths
-  subscriptionId = <subscription's ID>
-  customerId     = <customer's ID>
-```
-
-**Data used from response:**
-- `productUpgrades` — array of `{ sourceBaseOfferId, targetList[] }`
-- If `productUpgrades` is empty or absent → no upgrade available for this subscription
-
-**UI outcome:**
-- If upgrade paths exist → show an **Upgrade** button on that product card
-- If no upgrade paths exist → no button shown; product card renders as normal
-
-**Error handling:**
-- If the eligibility API call fails → do not show the Upgrade button; fail silently (log the error)
+- Partners can tell at a glance whether a subscription has an available upgrade, without leaving the Customer Details page.
+- Partners cannot open the upgrade flow for a subscription whose currency isn't one the partner is contracted in, or that's missing an offer ID.
+- Partners see an accurate price preview — including prorated amount — before committing to the switch order.
+- Partners get clear feedback after submitting an upgrade order.
 
 ---
 
-## Step 2 — Display available upgrade paths
+## Surface 1 — Upgrade Entry Point (Active Products, Customer Details Page)
 
-**Trigger:** User presses the **Upgrade** button on a product card.
+### Entry point
 
-**Data already available (no new API call needed):**
-- `productUpgrades` from Step 1 response — the target offers for this subscription
-- `sourceBaseOfferId` — the current product's offer ID
-- `subscriptionId`, `customerId`, `currentQuantity`, `currencyCode`
+An **Upgrade** action appears on a subscription's card in the Active Products list.
 
-**UI outcome:**
-- Show a popup dialog listing each upgrade path
-- For each target offer, display: product name, product icon, and offer ID
-- Resolve product names from the offer ID using the product catalogue (not the raw offer ID string)
-- Sort targets by `sequence` ascending
+### When the action is shown
 
-**User action:** User selects one upgrade target.
+The action is shown for a given subscription when **all** of the following hold:
 
-**Data captured on selection:**
-- `targetOfferId` — the selected target offer ID
+| Condition | Rule |
+|---|---|
+| Upgrade paths exist | `GET /v3/offer-switch-paths` (keyed by the subscription's ID) returns a non-empty `productUpgrades` entry with at least one `targetList` item |
+| Offer ID present | The subscription has an `offerId` |
 
-**Error handling:**
-- If no upgrade paths available → show "No upgrade options available for this product."
-- Provide a way to dismiss/close without taking action.
+
+**Error handling:** If the eligibility call fails, it is a silent failure — no error toast, no retry affordance. The subscription's upgrade data simply resolves as empty, so the Upgrade button does not render. This looks identical to a subscription that legitimately has no upgrade paths.
 
 ---
 
-## Step 3 — Redirect to Order Summary Page and Preview the upgrade order
+## Surface 2 — Upgrade Paths Dialog
 
-**Trigger:** User selects an upgrade target and navigates to order summary page.
+### Entry point
 
-**Purpose:** Fetch a price preview before the user commits to the order.
-This is a non-destructive call — it does not place an order.
+Pressing **Upgrade** on an Active Products card (Surface 1) opens the Upgrade Paths Dialog.
 
-**API call:**
-```
-POST /v3/customers/{customerId}/orders?fetch-price=true
-Body:
-  orderType:      "PREVIEW_SWITCH"
-  currencyCode:   <from subscription>
-  lineItems:      [{ extLineItemNumber: 1, offerId: targetOfferId, quantity: currentQuantity }]
-  cancellingItems:[{ extLineItemNumber: 1, referenceLineItemNumber: 1,
-                     subscriptionId: sourceSubscriptionId, quantity: currentQuantity }]
-```
+### Loading the dialog
 
-**Data used from response:**
-- `pricingSummary[].totalLineItemPartnerPrice` — estimated total cost for the partner
-- `lineItems[].pricing` — per-item pricing breakdown
+- The list of upgrade targets (`targetBaseOfferId`, `switchType` per target) is **passed in** from the data already fetched for eligibility (Surface 1) — no new call is made to re-fetch upgrade paths.
+- Product names for each target are resolved via a separate, **live** pricelist lookup per offer, made when the dialog opens. If that lookup fails or returns no match for an offer, the raw offer ID string is shown instead of a product name.
+- Targets render in the order returned by the API's `targetList` — the response does carry a `sequence` field per target, but it is not used to sort the list.
 
-**UI outcome:**
-- Show order summary: source product → target product (with icons and names)
-- Show quantity field (editable, default = current subscription quantity)
-- Show estimated total from the preview response
-- Show an **Update price** button — re-runs the preview call with updated quantity
-- Show a **Place order** button
+**Loading state:** "Loading upgrade options..." is shown in place of the target list while names are resolving.
 
-**Error handling:**
-- If preview call fails → show inline error; keep the screen open with a retry option
-- While preview is loading → show a loading indicator in the price area; disable Place order button
+### Screen layout
+
+- Header: "Available upgrades", with "Current product: **{product name}**"
+- One radio option per target offer: product icon, product name (or offer ID fallback), offer ID
+- Once a target is selected, a summary line appears: "Upgrade to: **{selected product name}**"
+
+**User action:** User selects one target offer.
+
+**Actions:**
+- **Cancel** — closes the dialog, no data is captured
+- **Proceed** — disabled until a target is selected; on press, captures the selected `targetOfferId` and its `switchType`, closes the dialog, and navigates to the Upgrade Order Summary (Surface 3)
+
+There is no explicit empty-state message in this dialog — it is only ever opened when Surface 1 has already confirmed at least one upgrade path exists, so an empty list isn't a state the dialog needs to handle today.
 
 ---
 
-## Step 4 — Update price (optional, user-triggered)
+## Surface 3 — Upgrade Order Summary (Checkout Page)
 
-**Trigger:** User changes quantity and presses **Update price**.
+### Entry point
 
-**Action:** Re-run the same preview API call from Step 3 with the new quantity.
+Reached from Surface 2's **Proceed** action. All data needed for the order — customer ID, reseller ID, source offer/subscription/currency, target offer, switch type, quantity — is carried via URL query parameters into the checkout page; nothing is passed through app context or session storage.
 
-**UI outcome:**
-- Refresh the displayed total price and offerId
-- If call fails → show inline error
+### Screen layout
 
----
+**Breadcrumb:** Resellers > {reseller name} > {customer name} > Review upgrade
 
-## Step 5 — Place the upgrade order
+**Left panel — "Review upgrade details":**
+- This purchase is for **{customer name}** on behalf of **{reseller name}**.
+- Upgraded licenses will be immediately available and automatically assigned.
+- Source → target product transition row: source product icon + "Licenses", a directional arrow, target product icon + "Licenses"
+- Adobe is not responsible for billing these licenses to the customer or collecting payments.
+- The amount is the partner price difference between **{source product name}** and **{target product name}** and pro-rated to the next anniversary date.
 
-**Trigger:** User presses **Place order**.
+**Right panel — "Order summary":**
+- Subheading: "{quantity} Licenses ({discount level text})" — same licenses-count-plus-discount-level pattern already used on the Renewal flow
+- "Reflecting partner pricing for customer."
+- Product card: target product icon + **{target product name}**, "Offer ID: {target offer ID}"
+- Quantity field, labeled "Licenses":
+  - Editable stepper (minimum 1, maximum = the source subscription's quantity at the time the upgrade was started) when the switch type is **partial-allowed**
+  - **Read-only**, fixed at the full quantity, when the switch type is **full-only** — this switch type does not allow partial quantity upgrades
+  - Line total for the current quantity shown to the right of the stepper
+- Below the quantity field: "{per-license price} per license" and "({proratedDays} days proration)", with an **Apply discount code** link at the right
+- **Update price** action
+- "Estimated Total" heading with the total amount to the right, and "+local taxes apply" beneath the amount
+- Terms line: By clicking "Place order", you will agree to pay Adobe for these licenses pursuant to Adobe's APC Agreement with you.
+- **Place order** action
 
-**API call:**
-```
-POST /v3/customers/{customerId}/orders
-Body:
-  orderType:      "SWITCH"
-  currencyCode:   <from subscription>
-  lineItems:      [{ extLineItemNumber: 1, offerId: targetOfferId, quantity: <current quantity> }]
-  cancellingItems:[{ extLineItemNumber: 1, referenceLineItemNumber: 1,
-                     subscriptionId: sourceSubscriptionId, quantity: <current quantity> }]
-```
+### Pricing preview
 
-**Data used from response:**
-- `orderId` — confirms the order was placed
-- `status` — order status
+- The preview (`PREVIEW_SWITCH`) fires **automatically on page load** — it is not a step the partner has to trigger themselves.
+- **Update price** re-runs the preview with the current quantity. It stays disabled until something has actually changed (a quantity edit) or while a preview request is already in flight — pressing it when nothing has changed is not possible.
+- Applying or removing a discount/promo code also re-runs the preview immediately, independent of the Update price button.
+- Preview request: one line item (target offer, quantity, any applied discount code) plus one cancelling item referencing the source subscription, **with that same quantity** — not the source subscription's full original quantity. A quantity edit updates both the line item and the cancelling item together; the partner is swapping N licenses from the source product to the target, not necessarily all of them.
+- Preview response populates: per-license price, line total, and the estimated total (per the response's own currency, which may differ from the source currency initially assumed).
 
-**UI outcome — success:**
-- Show a success confirmation (toast or inline message)
-- Navigate back to the customer detail screen
+**Loading state:** shown while the preview request is in flight; Place order is disabled during this time.
 
-**UI outcome — error:**
-- Show an inline error message with the failure reason
-- Keep the user on the order summary screen
-- Offer a retry option (re-enable Place order button)
-- Do not navigate away
+**Error state:** if the preview fails, an inline message shows the backend's error message when available, falling back to "Failed to load pricing. Click 'Update price' to retry." if not.
 
----
+### Submitting the order
 
-## Data flow summary
+**Place order** is disabled when: there's no line item yet, the estimated total hasn't resolved, a quantity/discount change is pending a fresh preview, a preview is currently in flight, or **the partner does not have write permission on the org** — this is the only point in the entire upgrade flow where write permission is checked.
 
-```
-Product listing screen
-  └── [on render, per subscription]
-        GET /v3/offer-switch-paths?subscriptionId=...&customerId=...
-          → productUpgrades[]
-          → show Upgrade button if paths exist
+On press, the switch order is submitted using the same request shape as the preview (target offer + quantity + source subscription as cancelling item **with that same quantity**), independent of the last preview response's own values.
 
-User presses Upgrade
-  └── open upgrade paths panel
-        display targetList[] from productUpgrades
-        [user selects target]
-          → navigate to order summary screen
-            carrying: customerId, subscriptionId, sourceOfferId,
-                      targetOfferId, quantity, currencyCode,
-                      customerName, resellerId
+**UI outcome — success:** navigates to a generic order-confirmation screen (the same one used for other order types), carrying the computed total, target product name, and quantity from local state — not literally the values returned by the switch order response.
 
-Order summary screen
-  └── [on load]
-        POST /v3/customers/{id}/orders (PREVIEW_SWITCH)
-          → pricingSummary → display estimated total
-
-  └── [user changes qty → Update price]
-        POST /v3/customers/{id}/orders (PREVIEW_SWITCH, new qty)
-          → refresh estimated total
-
-  └── [user confirms → Place order]
-        POST /v3/customers/{id}/orders (SWITCH)
-          → success → navigate to customer detail
-          → error   → show inline error, stay on screen
-```
+**UI outcome — error:** a fixed, generic message — "Failed to place order. Please try again." — is shown. Unlike the preview error, the actual backend failure reason is **not** surfaced here. There is no automatic retry; the partner must press Place order again manually.
 
 ---
 
+## Error Handling
+
+Applies to both the preview and submit calls from the Upgrade Order Summary screen (Surface 3).
+The **preview** and **plcae order** error path shows the backend's message as-is;
+
+---
 ## Edge cases
 
 | Scenario | Behaviour |
 |---|---|
-| No upgrade paths for a subscription | No Upgrade button shown; silent API failure also hides button |
-| Preview API fails on load | Inline error on order summary screen; Place order disabled |
-| User changes quantity below 1 | Quantity field enforces minimum of 1 |
-| Place order fails | Inline error shown; user stays on order summary; retry available |
+| No upgrade paths for a subscription | No Upgrade action shown; silent eligibility-API failure also hides it, indistinguishably from a genuine no-upgrade-paths case |
+| Switch type is full-only | Quantity field is read-only on the Order Summary screen; partner cannot upgrade a partial quantity |
+| Preview API fails on load | Inline error (backend message if available) on Order Summary screen; Place order stays disabled until a successful preview |
+| Place order fails | Generic inline error only; partner stays on the Order Summary screen; must manually retry (no auto-retry, no backend detail shown) |
 | User navigates back mid-flow | No order is placed; no side effects |
-
----
