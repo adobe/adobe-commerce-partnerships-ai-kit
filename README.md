@@ -18,13 +18,27 @@
 
 ## Available Features
 
-- **Flexible Discounts for Three-Year Commit customers** (Released June 26, 2026) - See visual mocks: [GIF](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/flexible-discounts/reference-files/visuals/3YC%20Discount%20Walkthrough.gif) | [MP4](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/flexible-discounts/reference-files/visuals/3YC%20Discount%20Walkthrough.mp4) | [PDF](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/flexible-discounts/reference-files/visuals/3YC%20Discount%20Walkthrough.pdf)
-- **Anytime Upgrade** (Released August 5, 2026) - See visual mocks: [GIF](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/anytimeUpgrade/reference-files/visuals/Anytime-Upgrade-Walkthrough.gif) | [MP4](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/anytimeUpgrade/reference-files/visuals/Anytime-Upgrade-Walkthrough.mp4) | [PDF](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/anytimeUpgrade/reference-files/visuals/Anytime-Upgrade-Walkthrough.pdf)
-- **Early Renewal** (Released August 5, 2026) - See visual mocks: [GIF](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/early-renewal/reference-files/visuals/Early-Renewal-Walkthrough.gif) | [MP4](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/early-renewal/reference-files/visuals/Early-Renewal-Walkthrough.mp4) | [PDF](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/early-renewal/reference-files/visuals/Early-Renewal-Walkthrough.pdf)
+- **Flexible Discounts for Three-Year Commit customers** *(Released June 26, 2026)* – See visual mocks: [GIF](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/flexible-discounts/reference-files/visuals/3YC%20Discount%20Walkthrough.gif) | [MP4](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/flexible-discounts/reference-files/visuals/3YC%20Discount%20Walkthrough.mp4) | [PDF](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/flexible-discounts/reference-files/visuals/3YC%20Discount%20Walkthrough.pdf)
+- **Anytime Upgrade** *(Released August 5, 2026)* – See visual mocks: [GIF](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/anytimeUpgrade/reference-files/visuals/Anytime-Upgrade-Walkthrough.gif) | [MP4](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/anytimeUpgrade/reference-files/visuals/Anytime-Upgrade-Walkthrough.mp4) | [PDF](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/anytimeUpgrade/reference-files/visuals/Anytime-Upgrade-Walkthrough.pdf)
+- **Early Renewal** *(Released August 5, 2026)* – See visual mocks: [GIF](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/early-renewal/reference-files/visuals/Early-Renewal-Walkthrough.gif) | [MP4](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/early-renewal/reference-files/visuals/Early-Renewal-Walkthrough.mp4) | [PDF](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/early-renewal/reference-files/visuals/Early-Renewal-Walkthrough.pdf)
 
-Prompt an LLM of your choice to implement any of the features above- [Get Started](manual/quick-start.md).
+> [!TIP]
+> ### 🚀 New here? Start here
+>
+> See the complete AI-assisted workflow before diving into the documentation.
+>
+> **The Quick Start Guide will help you:**
+> - 🎨 Visualize the feature before writing code
+> - 🤖 Generate implementation code with any AI coding assistant against the Adobe Commerce reference app and see the feature live
+> - 🚀 Build your first end-to-end integration in your codebase
+>
+> 👉 [Start the Quick Start Guide ↗](manual/quick-start.md)
 
-**Coming soon:** AI Kit for Recommendations
+---
+
+### Coming soon
+
+- AI Kit for Recommendations
 
 ## Must Read - [Disclaimer](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/DISCLAIMER.md)
 
