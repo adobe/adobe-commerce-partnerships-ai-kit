@@ -122,7 +122,7 @@ Reached from Surface 2's **Proceed** action. All data needed for the order — c
 
 ### Submitting the order
 
-**Place order** is disabled when: there's no line item yet, the estimated total hasn't resolved, a quantity/discount change is pending a fresh preview, a preview is currently in flight, or **the partner does not have write permission on the org** — this is the only point in the entire upgrade flow where write permission is checked.
+**Place order** is disabled when: there's no line item yet, the estimated total hasn't resolved, a quantity/discount change is pending a fresh preview, or a preview is currently in flight.
 
 On press, the switch order is submitted using the same request shape as the preview (target offer + quantity + source subscription as cancelling item **with that same quantity**), independent of the last preview response's own values.
 
