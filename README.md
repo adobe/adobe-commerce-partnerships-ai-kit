@@ -14,15 +14,17 @@
 
 **Business outcome:** Converts a manual, design-then-build cycle into a guided, repeatable workflow — cutting partner onboarding and integration time, reducing Adobe engineering support load, and giving partners a scalable, consistent, self-service path to build and ship Commerce integrations faster.
 
-**Note** - The AI Kit is currently available only for 3YC Discounts. Additional kits will be launched at a later date.
+**Note** - The AI Kit is currently available for 3YC Discounts, Anytime Upgrade, and Early Renewal. Additional kits will be launched at a later date.
 
-## Links
+## Available Features
 
-- See Visual mocks for  - Flex Discounts for Three-Year Commit customers - [(GIF)](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/flexible-discounts/reference-files/visuals/3YC%20Discount%20Walkthrough.gif)
- [(MP4)](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/flexible-discounts/reference-files/visuals/3YC%20Discount%20Walkthrough.mp4)
- [(PDF)](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/flexible-discounts/reference-files/visuals/3YC%20Discount%20Walkthrough.pdf)
-- Prompt an LLM of your choice to implement Flex Discounts for Three-Year Commit customers - [Get Started](manual/quick-start.md)
-- Coming soon -  AI Kits for Anytime Upgrades,  Early Renewals and Recommendations
+- **Flexible Discounts for Three-Year Commit customers** - See visual mocks: [GIF](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/flexible-discounts/reference-files/visuals/3YC%20Discount%20Walkthrough.gif) | [MP4](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/flexible-discounts/reference-files/visuals/3YC%20Discount%20Walkthrough.mp4) | [PDF](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/flexible-discounts/reference-files/visuals/3YC%20Discount%20Walkthrough.pdf)
+- **Anytime Upgrade** - See visual mocks: [GIF]
+- **Early Renewal** - See visual mocks: [GIF](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/early-renewal/reference-files/visuals/Early-Renewal-Walkthrough.gif) | [MP4](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/early-renewal/reference-files/visuals/Early-Renewal-Walkthrough.mp4) | [PDF](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/early-renewal/reference-files/visuals/Early-Renewal-Walkthrough.pdf)
+
+Prompt an LLM of your choice to implement any of the features below - [Get Started](manual/quick-start.md).
+
+**Coming soon:** AI Kit for Recommendations
 
 ## Must Read - [Disclaimer](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/DISCLAIMER.md)
 
