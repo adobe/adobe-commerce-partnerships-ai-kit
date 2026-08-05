@@ -4,14 +4,15 @@ This guide walks you through any VIP MP feature using AI-assisted code generatio
 
 ---
 
-## Optional — Visualize the experience before implementing
+## Visualize the experience before implementing
 
-Want a quick visual overview of the user journey? Pass the experience card to any AI agent and ask it to generate a visual reference:
+Want an interactive preview of the user journey before writing any code? Pass the experience card to any AI agent and ask it to build a mocked reference app:
 
-> Take `feature-specs/flexible-discounts/experience-card/flexible-discounts.md` and tell your agent:
-> *"Can you generate a visual representation of the user experience described in this file?"*
+> Using the attached Experience Card for the `<featureName>` feature, build a working reference app that simulates the end-to-end user journey — follow its workflows, business rules, and interactions, making reasonable assumptions where details are missing. Include a set of in-app scenarios (common, edge-case, and error) with expected outcomes.
 
-Most AI agents (Claude, ChatGPT, Gemini, GitHub Copilot) can generate a visual representation of the user journey — no code changes required.
+Example: `feature-specs/flexible-discounts/experience-card/flexible-discounts.md`
+
+Most AI agents (Claude, ChatGPT, Gemini, GitHub Copilot) can generate this — no changes to your actual project required.
 
 ---
 
@@ -53,6 +54,11 @@ Open your AI coding agent here. Skills are invoked as slash commands (e.g. `/imp
 ### Step 3 — Run the feature skill
 
 ```
+/implement-feature <featureName> ../adobe-commerce-partnerships-ref-app --use-reference-files
+```
+
+Example:
+```
 /implement-feature flexible-discounts ../adobe-commerce-partnerships-ref-app --use-reference-files
 ```
 
@@ -60,6 +66,11 @@ The `--use-reference-files` flag tells the skill to load the pre-approved LLD an
 
 ### Step 4 — Verify the feature
 
+```
+/verify-feature <featureName> ../adobe-commerce-partnerships-ref-app --use-reference-files
+```
+
+Example:
 ```
 /verify-feature flexible-discounts ../adobe-commerce-partnerships-ref-app --use-reference-files
 ```
