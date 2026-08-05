@@ -22,6 +22,8 @@
 - **Anytime Upgrade** *(Released August 5, 2026)* – See visual mocks: [GIF](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/anytimeUpgrade/reference-files/visuals/Anytime-Upgrade-Walkthrough.gif) | [MP4](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/anytimeUpgrade/reference-files/visuals/Anytime-Upgrade-Walkthrough.mp4) | [PDF](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/anytimeUpgrade/reference-files/visuals/Anytime-Upgrade-Walkthrough.pdf)
 - **Early Renewal** *(Released August 5, 2026)* – See visual mocks: [GIF](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/early-renewal/reference-files/visuals/Early-Renewal-Walkthrough.gif) | [MP4](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/early-renewal/reference-files/visuals/Early-Renewal-Walkthrough.mp4) | [PDF](https://github.com/adobe/adobe-commerce-partnerships-ai-kit/blob/main/feature-specs/early-renewal/reference-files/visuals/Early-Renewal-Walkthrough.pdf)
 
+
+
 > [!TIP]
 > ### 🚀 New here? Start here
 >
