@@ -10,7 +10,7 @@ Want an interactive preview of the user journey before writing any code? Pass th
 
 > Using the attached Experience Card for the `<featureName>` feature, build a working reference app that simulates the end-to-end user journey — follow its workflows, business rules, and interactions, making reasonable assumptions where details are missing. Include a set of in-app scenarios (common, edge-case, and error) with expected outcomes.
 
-Example: `feature-specs/flexible-discounts/experience-card/flexible-discounts.md`
+Example Experience Card: `feature-specs/flexible-discounts/experience-card/flexible-discounts.md`
 
 Most AI agents (Claude, ChatGPT, Gemini, GitHub Copilot) can generate this — no changes to your actual project required.
 
