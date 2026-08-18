@@ -1,4 +1,4 @@
-# Adobe Commerce Partnerships AI KIT
+# Adobe VIP Marketplace Partnerships AI KIT
 
 **What it is:** A self-contained AI-Kit combining a reference application ([adobe-commerce-partnerships-ref-app](https://github.com/adobe/adobe-commerce-partnerships-ref-app)) with an AI-assisted development workflow for building on Adobe Commerce Partner APIs.
 
