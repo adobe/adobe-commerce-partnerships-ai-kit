@@ -23,7 +23,7 @@ jobs:
         run: |
           mkdir -p traffic_data
 
-          # Fetch Traffic API JSON data
+          # Fetch Traffic API JSON data and export to environment variables
           VIEWS_JSON=$(curl -s -H "Authorization: token $TRAFFIC_PAT" \
             -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/$REPO/traffic/views")
@@ -32,18 +32,19 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/$REPO/traffic/clones")
 
-          # Inline Python script for safe, error-free CSV updating & deduplication
-          python3 -c "
+          # Pass values cleanly into Python via environment variables
+          RAW_VIEWS="$VIEWS_JSON" RAW_CLONES="$CLONES_JSON" python3 -c "
   import json, os, csv
 
 def update_csv(file_path, json_raw, key_name):
+  if not json_raw:
+    return
   try:
     data = json.loads(json_raw).get(key_name, [])
   except Exception as e:
     print(f'Error parsing JSON for {key_name}:', e)
     return
 
-  # Load existing CSV data into dict keyed by timestamp
   rows = {}
   if os.path.exists(file_path):
     with open(file_path, mode='r', newline='') as f:
@@ -52,7 +53,6 @@ def update_csv(file_path, json_raw, key_name):
         if 'timestamp' in r:
           rows[r['timestamp']] = r
 
-  # Merge or append new entries
   for item in data:
     ts = item.get('timestamp')
     if ts:
@@ -62,15 +62,14 @@ def update_csv(file_path, json_raw, key_name):
       'uniques': str(item.get('uniques', 0))
     }
 
-  # Write sorted CSV
   sorted_rows = sorted(rows.values(), key=lambda x: x['timestamp'])
   with open(file_path, mode='w', newline='') as f:
     writer = csv.DictWriter(f, fieldnames=['timestamp', 'count', 'uniques'])
     writer.writeheader()
     writer.writerows(sorted_rows)
 
-  update_csv('traffic_data/views.csv', '''$VIEWS_JSON''', 'views')
-  update_csv('traffic_data/clones.csv', '''$CLONES_JSON''', 'clones')
+  update_csv('traffic_data/views.csv', os.environ.get('RAW_VIEWS', ''), 'views')
+  update_csv('traffic_data/clones.csv', os.environ.get('RAW_CLONES', ''), 'clones')
   "
 
       - name: Commit and Push Updated Data
