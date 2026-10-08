@@ -34,54 +34,54 @@ jobs:
 
           # Inline Python script for safe, error-free CSV updating & deduplication
           python3 -c "
-import json, os, csv
+  import json, os, csv
 
 def update_csv(file_path, json_raw, key_name):
-    try:
-        data = json.loads(json_raw).get(key_name, [])
-    except Exception as e:
-        print(f'Error parsing JSON for {key_name}:', e)
-        return
+  try:
+    data = json.loads(json_raw).get(key_name, [])
+  except Exception as e:
+    print(f'Error parsing JSON for {key_name}:', e)
+    return
 
-    # Load existing CSV data into dict keyed by timestamp
-    rows = {}
-    if os.path.exists(file_path):
-        with open(file_path, mode='r', newline='') as f:
-            reader = csv.DictReader(f)
-            for r in reader:
-                if 'timestamp' in r:
-                    rows[r['timestamp']] = r
+  # Load existing CSV data into dict keyed by timestamp
+  rows = {}
+  if os.path.exists(file_path):
+    with open(file_path, mode='r', newline='') as f:
+      reader = csv.DictReader(f)
+      for r in reader:
+        if 'timestamp' in r:
+          rows[r['timestamp']] = r
 
-    # Merge or append new entries
-    for item in data:
-        ts = item.get('timestamp')
-        if ts:
-            rows[ts] = {
-                'timestamp': ts,
-                'count': str(item.get('count', 0)),
-                'uniques': str(item.get('uniques', 0))
-            }
+  # Merge or append new entries
+  for item in data:
+    ts = item.get('timestamp')
+    if ts:
+      rows[ts] = {
+      'timestamp': ts,
+      'count': str(item.get('count', 0)),
+      'uniques': str(item.get('uniques', 0))
+    }
 
-    # Write sorted CSV
-    sorted_rows = sorted(rows.values(), key=lambda x: x['timestamp'])
-    with open(file_path, mode='w', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=['timestamp', 'count', 'uniques'])
-        writer.writeheader()
-        writer.writerows(sorted_rows)
+  # Write sorted CSV
+  sorted_rows = sorted(rows.values(), key=lambda x: x['timestamp'])
+  with open(file_path, mode='w', newline='') as f:
+    writer = csv.DictWriter(f, fieldnames=['timestamp', 'count', 'uniques'])
+    writer.writeheader()
+    writer.writerows(sorted_rows)
 
-update_csv('traffic_data/views.csv', '''$VIEWS_JSON''', 'views')
-update_csv('traffic_data/clones.csv', '''$CLONES_JSON''', 'clones')
-"
+  update_csv('traffic_data/views.csv', '''$VIEWS_JSON''', 'views')
+  update_csv('traffic_data/clones.csv', '''$CLONES_JSON''', 'clones')
+  "
 
       - name: Commit and Push Updated Data
         run: |
           git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add traffic_data/
-          
-          if ! git diff --quiet --staged; then
-            git commit -m "chore: update repository traffic statistics [skip ci]"
-            git push
-          else
-            echo "No changes to commit."
-          fi
+  git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+  git add traffic_data/
+  
+  if ! git diff --quiet --staged; then
+git commit -m "chore: update repository traffic statistics [skip ci]"
+  git push
+  else
+  echo "No changes to commit."
+  fi
