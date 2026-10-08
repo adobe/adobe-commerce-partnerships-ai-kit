@@ -2,9 +2,8 @@ name: Track Traffic Statistics
 
 on:
   schedule:
-    # Runs automatically every day at 00:00 UTC
+    # Runs daily at 00:00 UTC
     - cron: '0 0 * * *'
-  # Allows you to trigger the action manually from the Actions tab anytime
   workflow_dispatch:
 
 jobs:
@@ -24,7 +23,7 @@ jobs:
         run: |
           mkdir -p traffic_data
 
-          # Fetch raw JSON responses from GitHub Traffic API
+          # Fetch Traffic API JSON data
           VIEWS_JSON=$(curl -s -H "Authorization: token $TRAFFIC_PAT" \
             -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/$REPO/traffic/views")
@@ -33,43 +32,46 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/$REPO/traffic/clones")
 
-          # --- Process Views ---
-          if [ ! -f traffic_data/views.csv ]; then
-            echo "timestamp,count,uniques" > traffic_data/views.csv
-          fi
+          # Inline Python script for safe, error-free CSV updating & deduplication
+          python3 -c "
+import json, os, csv
 
-          echo "$VIEWS_JSON" | jq -r '.views[]? | "\(.timestamp),\(.count),\(.uniques)"' | while read -r line; do
-            if [ -n "$line" ]; then
-              TIMESTAMP=$(echo "$line" | cut -d',' -f1)
-              # Avoid duplicates by removing existing entry for the same timestamp before appending
-              grep -v "^$TIMESTAMP" traffic_data/views.csv > traffic_data/views.tmp || true
-              mv traffic_data/views.tmp traffic_data/views.csv
-              echo "$line" >> traffic_data/views.csv
-            fi
-          done
+def update_csv(file_path, json_raw, key_name):
+    try:
+        data = json.loads(json_raw).get(key_name, [])
+    except Exception as e:
+        print(f'Error parsing JSON for {key_name}:', e)
+        return
 
-          # --- Process Clones ---
-          if [ ! -f traffic_data/clones.csv ]; then
-            echo "timestamp,count,uniques" > traffic_data/clones.csv
-          fi
+    # Load existing CSV data into dict keyed by timestamp
+    rows = {}
+    if os.path.exists(file_path):
+        with open(file_path, mode='r', newline='') as f:
+            reader = csv.DictReader(f)
+            for r in reader:
+                if 'timestamp' in r:
+                    rows[r['timestamp']] = r
 
-          echo "$CLONES_JSON" | jq -r '.clones[]? | "\(.timestamp),\(.count),\(.uniques)"' | while read -r line; do
-            if [ -n "$line" ]; then
-              TIMESTAMP=$(echo "$line" | cut -d',' -f1)
-              grep -v "^$TIMESTAMP" traffic_data/clones.csv > traffic_data/clones.tmp || true
-              mv traffic_data/clones.tmp traffic_data/clones.csv
-              echo "$line" >> traffic_data/clones.csv
-            fi
-          done
+    # Merge or append new entries
+    for item in data:
+        ts = item.get('timestamp')
+        if ts:
+            rows[ts] = {
+                'timestamp': ts,
+                'count': str(item.get('count', 0)),
+                'uniques': str(item.get('uniques', 0))
+            }
 
-          # Sort CSV files by timestamp (keeping header intact)
-          head -n 1 traffic_data/views.csv > traffic_data/views_sorted.csv
-          tail -n +2 traffic_data/views.csv | sort >> traffic_data/views_sorted.csv
-          mv traffic_data/views_sorted.csv traffic_data/views.csv
+    # Write sorted CSV
+    sorted_rows = sorted(rows.values(), key=lambda x: x['timestamp'])
+    with open(file_path, mode='w', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=['timestamp', 'count', 'uniques'])
+        writer.writeheader()
+        writer.writerows(sorted_rows)
 
-          head -n 1 traffic_data/clones.csv > traffic_data/clones_sorted.csv
-          tail -n +2 traffic_data/clones.csv | sort >> traffic_data/clones_sorted.csv
-          mv traffic_data/clones_sorted.csv traffic_data/clones.csv
+update_csv('traffic_data/views.csv', '''$VIEWS_JSON''', 'views')
+update_csv('traffic_data/clones.csv', '''$CLONES_JSON''', 'clones')
+"
 
       - name: Commit and Push Updated Data
         run: |
@@ -77,10 +79,9 @@ jobs:
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add traffic_data/
           
-          # Only commit if there are actual changes
           if ! git diff --quiet --staged; then
             git commit -m "chore: update repository traffic statistics [skip ci]"
             git push
           else
-            echo "No new traffic data to commit."
+            echo "No changes to commit."
           fi
